@@ -24,6 +24,7 @@ int main(int argc, char **argv)
 	char *flac_file_buf;
 	int flac_file_len;
 	char *text;
+	double confidence;
 	int err;
 	
 	/**
@@ -90,9 +91,11 @@ int main(int argc, char **argv)
 	 * then parse it to get the actual text
 	**/
 	text = sprec_get_text_from_json(resp->data);
+	confidence = sprec_get_confidence_from_json(resp->data);
 	sprec_free_response(resp);
 	
-	printf("%s\n", text ? text : "(null)");
+	printf("%s\n", text ? text : "");
+	printf("Confidence: %d%%\n", (int)(confidence * 100));
 	free(text);
 	
 	/**

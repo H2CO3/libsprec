@@ -22,9 +22,6 @@ install: $(TARGET)
 	cp -r include/sprec /usr/include/
 	cp -r include/sprec /Developer/Platforms/iPhoneOS.platform/SDKs/iPhoneOS4.2.sdk/usr/include/
 
-%.o: %.m
-	$(CC) $(CFLAGS) -o $@ $^
-
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $^
 

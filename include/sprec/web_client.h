@@ -15,7 +15,6 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -42,6 +41,13 @@ void sprec_free_response(struct sprec_server_response *resp);
  * Returns NULL on error.
 **/
 char *sprec_get_text_from_json(const char *json);
+
+/**
+ * Gets the confidence of the recognition algorithm.
+ * This may vary from 0.0 (not sure at all)
+ * to 1.0 (absolutely sure).
+**/
+double sprec_get_confidence_from_json(const char *json);
 
 /**
  * Read an entire file into memory. *buf should be free()'d after use.

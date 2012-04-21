@@ -62,8 +62,8 @@ int sprec_wav_header_write(int fd, struct sprec_wav_header *hdr);
 
 /**
  * Records a WAV (PCM) audio file to the file `filename', with the
- * parameters represente by `hdr', for `duration_ms' milliseconds.
- * Blocks until the recording is fully finished (this time may be
+ * parameters represented by `hdr', for `duration_ms' milliseconds.
+ * Blocks until the recording is fully completed (this time may be
  * longer than the requested recording time).
  * Returns 0 on success.
  * On Mac OS X and iOS, a non-zero return code should be

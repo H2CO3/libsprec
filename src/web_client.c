@@ -125,25 +125,46 @@ char *sprec_get_text_from_json(const char *json)
 	root = jsonz_object_parse(json);
 	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
 	
-	if (jsonz_object_array_length(guesses_array) > 0)
+	guess = jsonz_object_array_nth_element(guesses_array, 0);
+	str_obj = jsonz_object_object_get_element(guess, "utterance");
+	/**
+	 * The only exception: strdup(NULL) is undefined behaviour
+	**/
+	str_tmp = jsonz_object_string_get_str(str_obj);
+	if (str_tmp)
 	{
-		guess = jsonz_object_array_nth_element(guesses_array, 0);
-		str_obj = jsonz_object_object_get_element(guess, "utterance");
-		if (str_obj)
-		{
-			/**
-			 * The only exception: strdup(NULL) is undefined behaviour
-			**/
-			str_tmp = jsonz_object_string_get_str(str_obj);
-			if (str_tmp)
-			{
-				text = strdup(str_tmp);
-			}
-		}
+		text = strdup(str_tmp);
 	}
 	
 	jsonz_object_release(root);
 	return text;
+}
+
+double sprec_get_confidence_from_json(const char *json)
+{
+	void *root;
+	void *guesses_array;
+	void *guess;
+	void *num_obj;
+	double result;
+	
+	if (!json)
+	{
+		return 0.0;
+	}
+	
+	/**
+	 * Find the appropriate object in the JSON structure.
+	 * Here we don't check for (return value != NULL), as
+	 * libjsonz handles NULL inputs correctly.
+	**/
+	root = jsonz_object_parse(json);
+	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
+	guess = jsonz_object_array_nth_element(guesses_array, 0);
+	num_obj = jsonz_object_object_get_element(guess, "confidence");
+	result = jsonz_object_number_get_num_value(num_obj);
+	jsonz_object_release(root);
+	return result;
 }
 
 int sprec_get_file_contents(const char *file, char **buf, int *size)
