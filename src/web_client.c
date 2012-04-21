@@ -46,6 +46,7 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	conn_hndl = curl_easy_init();
 	if (!conn_hndl)
 	{
+		sprec_free_response(resp);
 		return NULL;
 	}
 	
