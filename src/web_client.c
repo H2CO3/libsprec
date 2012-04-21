@@ -23,16 +23,32 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	struct sprec_server_response *resp;
 	char url[128];
 	char header[128];
+	
+	if (!data)
+	{
+		return 0;
+	}
 
 	/**
 	 * Initialize the variables
 	 * Put the language code to the URL query string
+	 * If no language given, default to U. S. English
 	**/
-	sprintf(url, "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=%s", language);
+	sprintf(url, "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=%s", language ? language : "en-US");
 	resp = malloc(sizeof(*resp));
+	if (!resp)
+	{
+		return NULL;
+	}
+	
 	resp->data = malloc(1024);
 	resp->length = 0;
 	conn_hndl = curl_easy_init();
+	if (!conn_hndl)
+	{
+		return NULL;
+	}
+	
 	form = NULL;
 	lastptr = NULL;
 	headers = NULL;
@@ -78,26 +94,50 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 
 void sprec_free_response(struct sprec_server_response *resp)
 {
-	free(resp->data);
-	free(resp);
+	if (resp)
+	{
+		free(resp->data);
+		free(resp);
+	}
 }
 
 char *sprec_get_text_from_json(const char *json)
 {
+	void *root;
+	void *guesses_array;
+	void *guess;
+	void *str_obj;
+	char *str_tmp;
+	char *text;
+	
+	if (!json)
+	{
+		return NULL;
+	}
+	
 	/**
-	 * Find the appropriate object in the JSON structure
+	 * Find the appropriate object in the JSON structure.
+	 * Here we don't check for (return value != NULL), as
+	 * libjsonz handles NULL inputs correctly.
 	**/
-	void *root = jsonz_object_parse(json);
-	void *guesses_array = jsonz_object_object_get_element(root, "hypotheses");
-	char *text = NULL;
+	text = NULL;
+	root = jsonz_object_parse(json);
+	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
 	
 	if (jsonz_object_array_length(guesses_array) > 0)
 	{
-		void *guess = jsonz_object_array_nth_element(guesses_array, 0);
-		void *str_obj = jsonz_object_object_get_element(guess, "utterance");
+		guess = jsonz_object_array_nth_element(guesses_array, 0);
+		str_obj = jsonz_object_object_get_element(guess, "utterance");
 		if (str_obj)
 		{
-			text = strdup(jsonz_object_string_get_str(str_obj));
+			/**
+			 * The only exception: strdup(NULL) is undefined behaviour
+			**/
+			str_tmp = jsonz_object_string_get_str(str_obj);
+			if (str_tmp)
+			{
+				text = strdup(str_tmp);
+			}
 		}
 	}
 	
@@ -105,7 +145,7 @@ char *sprec_get_text_from_json(const char *json)
 	return text;
 }
 
-void sprec_get_file_contents(const char *file, char **buf, int *size)
+int sprec_get_file_contents(const char *file, char **buf, int *size)
 {
 	/**
 	 * Open file for reading
@@ -116,14 +156,22 @@ void sprec_get_file_contents(const char *file, char **buf, int *size)
 
 	char tmp[BUF_SIZE];
 	char *result;
+	char *realloc_guard;
 
 	/**
 	 * Read the whole file into memory
 	**/
 	for (result = NULL, total_size = 0; num_bytes > 0; num_bytes = read(fd, tmp, BUF_SIZE))
 	{
-		result = realloc(result, total_size + num_bytes);
-		assert(result);
+		realloc_guard = realloc(result, total_size + num_bytes);
+		if (!realloc_guard)
+		{
+			close(fd);
+			free(result);
+			return -1;
+		}
+		
+		result = realloc_guard;
 		memcpy(result + total_size, tmp, num_bytes);
 		total_size += num_bytes;
 	}
@@ -131,6 +179,8 @@ void sprec_get_file_contents(const char *file, char **buf, int *size)
 	close(fd);
 	*buf = result;
 	*size = total_size;
+	
+	return 0;
 }
 
 static size_t http_callback(char *ptr, size_t count, size_t blocksize, void *userdata)

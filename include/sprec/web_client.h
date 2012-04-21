@@ -30,6 +30,7 @@ struct sprec_server_response {
  * Returns a struct server_response pointer,
  * in which the API's JSON response is present.
  * Should be freed with sprec_free_response().
+ * Returns NULL on error.
 **/
 struct sprec_server_response *sprec_send_audio_data(void *data, int length, const char *language, uint32_t sample_rate);
 
@@ -38,13 +39,15 @@ void sprec_free_response(struct sprec_server_response *resp);
 /**
  * Duplicates the actually useful (i. e. text) part of the JSON
  * data received. Must be free()'d after use.
+ * Returns NULL on error.
 **/
 char *sprec_get_text_from_json(const char *json);
 
 /**
  * Read an entire file into memory. *buf should be free()'d after use.
+ * Returns 0 on success, non-0 on error
 **/
-void sprec_get_file_contents(const char *file, char **buf, int *size);
+int sprec_get_file_contents(const char *file, char **buf, int *size);
 
 #ifdef __cplusplus
 }

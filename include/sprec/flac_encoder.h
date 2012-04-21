@@ -23,8 +23,9 @@ extern "C" {
  * to a FLAC file with the same sample rate,
  * channel number and bit depth. Writes the result
  * to the file at path `flacfile'.
+ * Returns 0 on success, non-0 on error.
 **/
-void sprec_flac_encode(const char *wavfile, const char *flacfile);
+int sprec_flac_encode(const char *wavfile, const char *flacfile);
 
 #ifdef __cplusplus
 }

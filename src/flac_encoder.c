@@ -6,7 +6,6 @@
  * on Sun 15/04/2012.
 **/
 
-#include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <FLAC/all.h>
@@ -31,7 +30,7 @@ static FLAC__byte buffer[BUFFSIZE * 2 * 2];
 **/
 static FLAC__int32 pcm[BUFFSIZE * 2];
 
-void sprec_flac_encode(const char *wavfile, const char *flacfile)
+int sprec_flac_encode(const char *wavfile, const char *flacfile)
 {
 	FLAC__StreamEncoder *encoder;
 	FILE *infile;
@@ -41,7 +40,13 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 	uint32_t channels;
 	uint32_t bits_per_sample;
 	uint32_t data_offset;
+	int err;
 
+	if (!wavfile || !flacfile)
+	{
+		return -1;
+	}
+	
 	/**
 	 * Remove the original file, if present, in order
 	 * not to leave chunks of old data inside
@@ -55,13 +60,21 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 	 * other garbage before the data (NB Apple's 4kB FLLR section!)
 	**/
 	infile = fopen(wavfile, "rb");
+	if (!infile)
+	{
+		return -1;
+	}
 	fread(buffer, BUFFSIZE, 1, infile);
 
 	/**
 	 * Search the offset of the data section
 	**/
 	data_location = memstr((char *)buffer, "data", BUFFSIZE);
-	assert(data_location);
+	if (!data_location)
+	{
+		fclose(infile);
+		return -1;
+	}
 	data_offset = data_location - (char *)buffer;
 
 	/**
@@ -71,6 +84,11 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 	fseek(infile, data_offset + 4 + 4, SEEK_SET);
 	
 	struct sprec_wav_header *hdr = sprec_wav_header_from_data((char *)buffer);
+	if (!hdr)
+	{
+		fclose(infile);
+		return -1;
+	}
 
 	/**
 	 * Sample rate must be between 16000 and 44000
@@ -94,6 +112,12 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 	 * Create and initialize the FLAC encoder
 	**/
 	encoder = FLAC__stream_encoder_new();
+	if (!encoder)
+	{
+		fclose(infile);
+		free(hdr);
+		return -1;
+	}
 
 	FLAC__stream_encoder_set_verify(encoder, true);
 	FLAC__stream_encoder_set_compression_level(encoder, 5);
@@ -102,7 +126,14 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 	FLAC__stream_encoder_set_sample_rate(encoder, sample_rate);
 	FLAC__stream_encoder_set_total_samples_estimate(encoder, total_samples);
 
-	FLAC__stream_encoder_init_file(encoder, flacfile, NULL	, NULL);
+	err = FLAC__stream_encoder_init_file(encoder, flacfile, NULL, NULL);
+	if (err)
+	{
+		fclose(infile);
+		free(hdr);
+		FLAC__stream_encoder_delete(encoder);
+		return -1;
+	}
 
 	/**
 	 * Feed the PCM data to the encoder in 64kB chunks
@@ -132,7 +163,15 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 			}
 		}
 		
-		FLAC__stream_encoder_process_interleaved(encoder, pcm, need);
+		FLAC__bool succ = FLAC__stream_encoder_process_interleaved(encoder, pcm, need);
+		if (!succ)
+		{
+			fclose(infile);
+			free(hdr);
+			FLAC__stream_encoder_delete(encoder);
+			return -1;
+		}
+
 		left -= need;
 	}
 
@@ -147,8 +186,9 @@ void sprec_flac_encode(const char *wavfile, const char *flacfile)
 	FLAC__stream_encoder_delete(encoder);
 	fclose(infile);
 	free(hdr);
+	
+	return 0;
 }
-
 
 char *memstr(char *haystack, char *needle, int size)
 {
