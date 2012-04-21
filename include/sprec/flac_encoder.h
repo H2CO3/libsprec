@@ -1,0 +1,34 @@
+/**
+ * flac_encoder.h
+ * libsprec
+ *
+ * Created by Árpád Goretity (H2CO3)
+ * on Sun 15/04/2012.
+**/
+
+#ifndef __FLAC_ENCODER_H__
+#define __FLAC_ENCODER_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+
+/**
+ * Converts a WAV PCM file at the path `wavfile'
+ * to a FLAC file with the same sample rate,
+ * channel number and bit depth. Writes the result
+ * to the file at path `flacfile'.
+**/
+void sprec_flac_encode(const char *wavfile, const char *flacfile);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* __FLAC_ENCODER_H__ */
+
