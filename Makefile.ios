@@ -2,7 +2,7 @@ TARGET = libsprec.dylib
 OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o
 SYSROOT = /Developer/Platforms/iPhoneOS.platform/SDKs/iPhoneOS4.2.sdk/
 CFLAGS = -isysroot $(SYSROOT) -dynamiclib -c -Wall -Iinclude
-LDFLAGS = -isysroot $(SYSROOT) -w -dynamiclib -framework CoreFoundation -framework AudioToolbox -lcurl -ljsonz -lFLAC
+LDFLAGS = -isysroot $(SYSROOT) -w -dynamiclib -install_name /usr/lib/$(TARGET) -framework CoreFoundation -framework AudioToolbox -lcurl -ljsonz -lFLAC
 CC = arm-apple-darwin9-gcc
 LD = $(CC)
 
