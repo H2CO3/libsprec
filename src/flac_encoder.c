@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity (H2CO3)
  * on Sun 15/04/2012.
-**/
+ */
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,16 +18,16 @@
  * Search a NUL-terminated C string in a byte array
  * Returns: location of the string, or
  * NULL if not found
-**/
+ */
 char *memstr(char *haystack, char *needle, int size);
 
 /**
  * BUFFSIZE samples * 2 bytes per sample * 2 channels
-**/
+ */
 static FLAC__byte buffer[BUFFSIZE * 2 * 2];
 /**
  * BUFFSIZE samples * 2 channels
-**/
+ */
 static FLAC__int32 pcm[BUFFSIZE * 2];
 
 int sprec_flac_encode(const char *wavfile, const char *flacfile)
@@ -50,7 +50,7 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 	/**
 	 * Remove the original file, if present, in order
 	 * not to leave chunks of old data inside
-	**/
+	 */
 	remove(flacfile);
 
 	/**
@@ -58,7 +58,7 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 	 * that we will find the beginning of the data section, even
 	 * if the WAV header is non-standard and contains
 	 * other garbage before the data (NB Apple's 4kB FLLR section!)
-	**/
+	 */
 	infile = fopen(wavfile, "rb");
 	if (!infile)
 	{
@@ -68,7 +68,7 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 
 	/**
 	 * Search the offset of the data section
-	**/
+	 */
 	data_location = memstr((char *)buffer, "data", BUFFSIZE);
 	if (!data_location)
 	{
@@ -80,7 +80,7 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 	/**
 	 * For an explanation on why the 4 + 4 byte extra offset is there,
 	 * see the comment for calculating the number of total_samples.
-	**/
+	 */
 	fseek(infile, data_offset + 4 + 4, SEEK_SET);
 	
 	struct sprec_wav_header *hdr = sprec_wav_header_from_data((char *)buffer);
@@ -95,7 +95,7 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 	 * for the Google Speech APIs.
 	 * There should be two channels.
 	 * Sample depth is 16 bit signed, little endian.
-	**/
+	 */
 	sample_rate = hdr->sample_rate;
 	channels = hdr->number_of_channels;
 	bits_per_sample = hdr->bits_per_sample;
@@ -105,12 +105,12 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 	 * the eight bytes at position `data_offset' are:
 	 * 'data' then a 32-bit unsigned int, representing
 	 * the length of the data section.
-	**/
+	 */
 	total_samples = ((hdr->file_size + 8) - (data_offset + 4 + 4)) / (channels * bits_per_sample / 8);
 
 	/**
 	 * Create and initialize the FLAC encoder
-	**/
+	 */
 	encoder = FLAC__stream_encoder_new();
 	if (!encoder)
 	{
@@ -137,7 +137,7 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 
 	/**
 	 * Feed the PCM data to the encoder in 64kB chunks
-	**/
+	 */
 	size_t left = total_samples;
 	while (left > 0)
 	{
@@ -151,14 +151,14 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 			{
 				/**
 				 * 16 bps, signed little endian
-				**/
+				 */
 				pcm[i] = *(int16_t *)(buffer + i * 2);
 			}
 			else
 			{
 				/**
 				 * 8 bps, unsigned
-				**/
+				 */
 				pcm[i] = *(uint8_t *)(buffer + i);
 			}
 		}
@@ -177,12 +177,12 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 
 	/**
 	 * Write out/finalize the file
-	**/
+	 */
 	FLAC__stream_encoder_finish(encoder);
 
 	/**
 	 * Clean up
-	**/
+	 */
 	FLAC__stream_encoder_delete(encoder);
 	fclose(infile);
 	free(hdr);
@@ -201,14 +201,14 @@ char *memstr(char *haystack, char *needle, int size)
 		{
 			/**
 			 * Found it
-			**/
+			 */
 			return p;
 		}
 	}
 	
 	/**
 	 * Not found
-	**/
+	 */
 	return NULL;
 }
 

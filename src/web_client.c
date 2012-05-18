@@ -4,7 +4,7 @@
  * 
  * Created by Árpád Goretity (H2CO3)
  * on Tue 17/04/2012
-**/
+ */
 
 #include <curl/curl.h>
 #include <jsonz/jsonz.h>
@@ -33,7 +33,7 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	 * Initialize the variables
 	 * Put the language code to the URL query string
 	 * If no language given, default to U. S. English
-	**/
+	 */
 	sprintf(url, "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=%s", language ? language : "en-US");
 	resp = malloc(sizeof(*resp));
 	if (!resp)
@@ -60,7 +60,7 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 
 	/**
 	 * Setup the cURL handle
-	**/
+	 */
 	curl_easy_setopt(conn_hndl, CURLOPT_URL, url);
 	curl_easy_setopt(conn_hndl, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(conn_hndl, CURLOPT_HTTPPOST, form);
@@ -70,24 +70,24 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	/**
 	 * SSL certificates are not available on iOS, so we have to trust Google
 	 * (0 means false)
-	**/
+	 */
 	curl_easy_setopt(conn_hndl, CURLOPT_SSL_VERIFYPEER, 0);
 
 	/**
 	 * Initiate the HTTP(S) transfer
-	**/
+	 */
 	curl_easy_perform(conn_hndl);
 
 	/**
 	 * Clean up
-	**/
+	 */
 	curl_formfree(form);
 	curl_slist_free_all(headers);
 	curl_easy_cleanup(conn_hndl);
 
 	/**
 	 * NULL-terminate the JSON response string
-	 **/
+	 */
 	resp->data[resp->length] = '\0';
 
 	return resp;
@@ -120,7 +120,7 @@ char *sprec_get_text_from_json(const char *json)
 	 * Find the appropriate object in the JSON structure.
 	 * Here we don't check for (return value != NULL), as
 	 * libjsonz handles NULL inputs correctly.
-	**/
+	 */
 	text = NULL;
 	root = jsonz_object_parse(json);
 	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
@@ -129,7 +129,7 @@ char *sprec_get_text_from_json(const char *json)
 	str_obj = jsonz_object_object_get_element(guess, "utterance");
 	/**
 	 * The only exception: strdup(NULL) is undefined behaviour
-	**/
+	 */
 	str_tmp = jsonz_object_string_get_str(str_obj);
 	if (str_tmp)
 	{
@@ -157,7 +157,7 @@ double sprec_get_confidence_from_json(const char *json)
 	 * Find the appropriate object in the JSON structure.
 	 * Here we don't check for (return value != NULL), as
 	 * libjsonz handles NULL inputs correctly.
-	**/
+	 */
 	root = jsonz_object_parse(json);
 	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
 	guess = jsonz_object_array_nth_element(guesses_array, 0);
@@ -171,7 +171,7 @@ int sprec_get_file_contents(const char *file, char **buf, int *size)
 {
 	/**
 	 * Open file for reading
-	**/
+	 */
 	int fd = open(file, O_RDONLY);
 	int total_size;
 	int num_bytes = 1;
@@ -182,7 +182,7 @@ int sprec_get_file_contents(const char *file, char **buf, int *size)
 
 	/**
 	 * Read the whole file into memory
-	**/
+	 */
 	for (result = NULL, total_size = 0; num_bytes > 0; num_bytes = read(fd, tmp, BUF_SIZE))
 	{
 		realloc_guard = realloc(result, total_size + num_bytes);
@@ -208,7 +208,7 @@ int sprec_get_file_contents(const char *file, char **buf, int *size)
 static size_t http_callback(char *ptr, size_t count, size_t blocksize, void *userdata)
 {
 	struct sprec_server_response *response = userdata;
-	int size = count * blocksize;
+	size_t size = count * blocksize;
 	memcpy(response->data + response->length, ptr, size);
 	response->length += size;
 	return size;

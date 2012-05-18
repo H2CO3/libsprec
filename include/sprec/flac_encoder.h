@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity (H2CO3)
  * on Sun 15/04/2012.
-**/
+ */
 
 #ifndef __FLAC_ENCODER_H__
 #define __FLAC_ENCODER_H__
@@ -24,7 +24,7 @@ extern "C" {
  * channel number and bit depth. Writes the result
  * to the file at path `flacfile'.
  * Returns 0 on success, non-0 on error.
-**/
+ */
 int sprec_flac_encode(const char *wavfile, const char *flacfile);
 
 #ifdef __cplusplus

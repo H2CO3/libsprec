@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity (H2CO3)
  * on Sun 15/04/2012.
-**/
+ */
 
 #include <unistd.h>
 #include <sprec/wav.h>
@@ -49,7 +49,7 @@ struct sprec_wav_header *sprec_wav_header_from_data(const char *ptr)
 	/**
 	 * We could use __attribute__((__packed__)) and a single memcpy(),
 	 * but we choose this approach for the sake of portability.
-	**/
+	 */
 	memcpy(&hdr->RIFF_marker, ptr + 0, 4);
 	memcpy(&hdr->file_size, ptr + 4, 4);
 	memcpy(&hdr->filetype_header, ptr + 8, 4);
@@ -119,13 +119,13 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 #if defined _WIN64 || defined _WIN32
 	/**
 	 * Windows
-	**/
+	 */
 	return -1;
 	#error "This needs to be implemented yet..."
 #elif defined __APPLE__
 	/**
 	 * Mac OS X or iOS
-	**/
+	 */
 	struct sprec_record_state record_state;
 	int i;
 	OSStatus status;
@@ -134,7 +134,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	
 	/**
 	 * Create a new AudioFile
-	**/
+	 */
 	CFURLRef file_url = CFURLCreateFromFileSystemRepresentation(NULL, (UInt8 *)filename, strlen(filename), false);
 	status = AudioQueueNewInput(&record_state.data_format, sprec_handle_input_buffer, &record_state, NULL, NULL, 0, &record_state.queue);
 	if (status)
@@ -142,15 +142,15 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 		return status;
 	}
 	status = AudioFileCreateWithURL(file_url, kAudioFileWAVEType, &record_state.data_format, kAudioFileFlags_EraseFile, &record_state.audio_file);
+	CFRelease(file_url);
 	if (status)
 	{
 		return status;
 	}
-	CFRelease(file_url);
 	
 	/**
 	 * Allocate the buffers and enqueue them
-	**/
+	 */
 	sprec_calculate_buffsize(record_state.queue, record_state.data_format, 0.5, &record_state.buffer_byte_size);
 	for (i = 0; i < NUM_BUFFERS; i++)
 	{
@@ -178,7 +178,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	 * In general, it takes about one second for the
 	 * buffers to be fully empty, so we wait (duration_ms + 1000) milliseconds
 	 * in order not to loose audio data.
-	**/
+	 */
 	
 	sprec_delay_millisec(duration_ms + 1000);
 	
@@ -197,7 +197,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	/**
 	 * Linux, Solaris, etc.
 	 * Let's hope they have an available ALSA port
-	**/
+	 */
 	int i;
 	int size;
 	snd_pcm_t *handle;
@@ -211,21 +211,22 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	
 	/**
 	 * Open PCM device for recording
-	**/
+	 */
 	err = snd_pcm_open(&handle, "pulse", SND_PCM_STREAM_CAPTURE, 0);
 	if (err)
 	{
 		return err;
 	}
+
 	/**
 	 * Allocate a hardware parameters object.
-	**/
+	 */
 	snd_pcm_hw_params_alloca(&params);
 
 	/**
 	 * Fill it in with default values, then set
 	 * the non-default ones manually
-	**/
+	 */
 	snd_pcm_hw_params_any(handle, params);
 
 	err = snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
@@ -262,7 +263,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 
 	/**
 	 * Interrupt period size equals 32 frames
-	**/
+	 */
 	frames = 32;
 	err = snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir);
 	if (err)
@@ -273,7 +274,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	
 	/**
 	 * Write the parameters to the driver
-	**/
+	 */
 	err = snd_pcm_hw_params(handle, params);
 	if (err)
 	{
@@ -291,7 +292,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	/**
 	 * multiply by number of bytes/sample
 	 * and number of channels
-	**/
+	 */
 	size = frames * hdr->bits_per_sample / 8 * hdr->number_of_channels;
 	buffer = malloc(size);
 	if (!buffer)
@@ -303,7 +304,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	/**
 	 * Calculate number of loops and the size of
 	 * the raw PCM data
-	**/
+	 */
 	err = snd_pcm_hw_params_get_period_time(params, &val, &dir);
 	if (err)
 	{
@@ -317,7 +318,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	/**
 	 * Open the WAV file for output;
 	 * write out the WAV header
-	**/
+	 */
 	fd = open(filename, O_WRONLY | O_CREAT, 0644);
 	err = sprec_wav_header_write(fd, hdr);
 	if (err)
@@ -335,7 +336,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 		{
 			/**
 			 * minus EPIPE means X-run
-			**/
+			 */
 			snd_pcm_prepare(handle);
 		}
 		
@@ -344,7 +345,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 
 	/**
 	 * Clean up
-	**/
+	 */
 	close(fd);
 	snd_pcm_drain(handle);
 	snd_pcm_close(handle);
@@ -380,7 +381,7 @@ void sprec_handle_input_buffer(void *data, AudioQueueRef inAQ, AudioQueueBufferR
 {
 	/**
 	 * "Audio data received" callback
-	**/
+	 */
 	struct sprec_record_state *aq_data = data;
 	
 	if (!num_packets && aq_data->data_format.mBytesPerPacket)
@@ -390,7 +391,7 @@ void sprec_handle_input_buffer(void *data, AudioQueueRef inAQ, AudioQueueBufferR
 	
 	/**
 	 * Write the PCM chunk into the file
-	**/
+	 */
 	if (AudioFileWritePackets(aq_data->audio_file, false, buffer->mAudioDataByteSize, desc, aq_data->current_packet, &num_packets, buffer->mAudioData) == noErr)
 	{
 		aq_data->current_packet += num_packets;
@@ -402,7 +403,7 @@ void sprec_calculate_buffsize(AudioQueueRef audio_queue, AudioStreamBasicDescrip
 {
 	/**
 	 * Constrain the maximum buffer size to 50 kB
-	**/
+	 */
 	static const int max_buf_size = 0x50000;
 	int max_packet_size = desc.mBytesPerPacket; 
 	if (!max_packet_size) 

@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity (H2CO3)
  * on Sun 15/04/2012.
-**/
+ */
 
 #ifndef __WAV_H__
 #define __WAV_H__
@@ -20,7 +20,7 @@ extern "C" {
 
 /**
  * _without_ the data header (8 bytes)
-**/
+ */
 #define SPREC_WAV_HEADER_SIZE 36
 
 struct sprec_wav_header {
@@ -42,14 +42,14 @@ struct sprec_wav_header {
  * (i. e. the first SPREC_WAV_HEADER_SIZE bytes of a WAV file).
  * Returns NULL on error.
  * Should be free()'d after use.
-**/
+ */
 struct sprec_wav_header *sprec_wav_header_from_data(const char *ptr);
 
 /**
  * Allocates a new WAV file header from the given PCM parameters.
  * Returns NULL on error.
  * Should be free()'d after use.
-**/
+ */
 struct sprec_wav_header *sprec_wav_header_from_params(uint32_t sample_rate, uint16_t bit_depth, uint16_t channels);
 
 /**
@@ -57,7 +57,7 @@ struct sprec_wav_header *sprec_wav_header_from_params(uint32_t sample_rate, uint
  * The stream position indicator should be at the beginning
  * of the file.
  * Returns 0 on success, non-0 on error.
-**/
+ */
 int sprec_wav_header_write(int fd, struct sprec_wav_header *hdr);
 
 /**
@@ -69,7 +69,7 @@ int sprec_wav_header_write(int fd, struct sprec_wav_header *hdr);
  * On Mac OS X and iOS, a non-zero return code should be
  * interpreted as an AudioQueue error code.
  * On other Unices, the return code is an ALSA (libasound) status code.
-**/
+ */
 int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_t duration_ms);
 
 #ifdef __cplusplus
