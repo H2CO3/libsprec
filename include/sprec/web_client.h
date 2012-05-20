@@ -6,8 +6,8 @@
  * on Tue 17/04/2012
  */
 
-#ifndef __WEB_CLIENT_H__
-#define __WEB_CLIENT_H__
+#ifndef __SPREC_WEB_CLIENT_H__
+#define __SPREC_WEB_CLIENT_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,5 +59,5 @@ int sprec_get_file_contents(const char *file, char **buf, int *size);
 }
 #endif /* __cplusplus */
 
-#endif /* __WEB_CLIENT_H__ */
+#endif /* !__SPREC_WEB_CLIENT_H__ */
 

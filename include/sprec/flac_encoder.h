@@ -6,8 +6,8 @@
  * on Sun 15/04/2012.
  */
 
-#ifndef __FLAC_ENCODER_H__
-#define __FLAC_ENCODER_H__
+#ifndef __SPREC_FLAC_ENCODER_H__
+#define __SPREC_FLAC_ENCODER_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,5 +31,5 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile);
 }
 #endif /* __cplusplus */
 
-#endif /* __FLAC_ENCODER_H__ */
+#endif /* !__SPREC_FLAC_ENCODER_H__ */
 

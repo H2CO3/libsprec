@@ -1,5 +1,5 @@
 TARGET = libsprec.dylib
-OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o
+OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o src/recognize.o
 SYSROOT = /Developer/Platforms/iPhoneOS.platform/SDKs/iPhoneOS4.2.sdk/
 CFLAGS = -isysroot $(SYSROOT) -dynamiclib -c -Wall -Iinclude
 LDFLAGS = -isysroot $(SYSROOT) -w -dynamiclib -install_name /usr/lib/$(TARGET) -framework CoreFoundation -framework AudioToolbox -lcurl -ljsonz -lFLAC
@@ -13,7 +13,12 @@ $(TARGET): $(OBJECTS)
 
 tool: sprec
 
+simple: sprec_simple
+
 sprec: examples/tool.o $(TARGET)
+	$(LD) -isysroot $(SYSROOT) -o $@ $< -lsprec
+
+sprec_simple: examples/simple.o $(TARGET)
 	$(LD) -isysroot $(SYSROOT) -o $@ $< -lsprec
 
 install: $(TARGET)
@@ -26,7 +31,7 @@ install: $(TARGET)
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f $(TARGET) sprec src/*.o examples/*.o *~
+	rm -f $(TARGET) sprec sprec_simple src/*.o examples/*.o *~
 
 .PHONY: all clean install tool sprec
 

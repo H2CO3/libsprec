@@ -6,8 +6,8 @@
  * on Sun 15/04/2012.
  */
 
-#ifndef __WAV_H__
-#define __WAV_H__
+#ifndef __SPREC_WAV_H__
+#define __SPREC_WAV_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,5 +76,5 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 }
 #endif /* __cplusplus */
 
-#endif /* __WAV_H__ */
+#endif /* !__SPREC_WAV_H__ */
 
