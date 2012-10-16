@@ -15,10 +15,10 @@ tool: sprec
 simple: sprec_simple
 
 sprec: examples/tool.o $(TARGET)
-	$(LD) -isysroot $(SYSROOT) -o $@ $< -lsprec
+	$(LD) -o $@ $< -lsprec
 
 sprec_simple: examples/simple.o $(TARGET)
-	$(LD) -isysroot $(SYSROOT) -o $@ $< -lsprec
+	$(LD) -o $@ $< -lsprec
 
 install: $(TARGET)
 	cp $(TARGET) /usr/lib/
