@@ -42,9 +42,7 @@ struct sprec_wav_header *sprec_wav_header_from_data(const void *ptr)
 	struct sprec_wav_header *hdr;
 	hdr = malloc(sizeof(*hdr));
 	if (!hdr)
-	{
 		return NULL;
-	}
 	
 	/*
 	 * We could use __attribute__((__packed__)) and a single memcpy(),
