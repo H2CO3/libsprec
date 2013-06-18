@@ -1,4 +1,4 @@
-/**
+/*
  * wav.h
  * libsprec
  *
@@ -18,7 +18,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
-/**
+/*
  * _without_ the data header (8 bytes)
  */
 #define SPREC_WAV_HEADER_SIZE 36
@@ -37,22 +37,22 @@ struct sprec_wav_header {
 	uint16_t bits_per_sample;
 };
 
-/**
+/*
  * Allocates a new WAV file header from the raw header data
  * (i. e. the first SPREC_WAV_HEADER_SIZE bytes of a WAV file).
  * Returns NULL on error.
  * Should be free()'d after use.
  */
-struct sprec_wav_header *sprec_wav_header_from_data(const char *ptr);
+struct sprec_wav_header *sprec_wav_header_from_data(const void *ptr);
 
-/**
+/*
  * Allocates a new WAV file header from the given PCM parameters.
  * Returns NULL on error.
  * Should be free()'d after use.
  */
 struct sprec_wav_header *sprec_wav_header_from_params(uint32_t sample_rate, uint16_t bit_depth, uint16_t channels);
 
-/**
+/*
  * Writes a WAV header to a file represented by `fd'.
  * The stream position indicator should be at the beginning
  * of the file.
@@ -60,7 +60,7 @@ struct sprec_wav_header *sprec_wav_header_from_params(uint32_t sample_rate, uint
  */
 int sprec_wav_header_write(int fd, struct sprec_wav_header *hdr);
 
-/**
+/*
  * Records a WAV (PCM) audio file to the file `filename', with the
  * parameters represented by `hdr', for `duration_ms' milliseconds.
  * Blocks until the recording is fully completed (this time may be

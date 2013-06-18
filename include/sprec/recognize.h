@@ -1,4 +1,4 @@
-/**
+/*
  * recognize.h
  * libsprec
  *
@@ -22,7 +22,7 @@ struct sprec_result {
 
 typedef void (*sprec_callback)(struct sprec_result *, void *);
 
-/**
+/*
  * Performs a synchronous text recognition session in the given language,
  * listening for the duration specified by `dur_s' (in seconds),
  * then returns the recognized text and the recognition confidence.
@@ -31,12 +31,12 @@ typedef void (*sprec_callback)(struct sprec_result *, void *);
  */
 struct sprec_result *sprec_recognize_sync(const char *lang, float dur_s);
 
-/**
+/*
  * Frees the resources used by `res'. Invalidates `res'.
  */
 void sprec_result_free(struct sprec_result *res);
 
-/**
+/*
  * Performs an asynchronous text recognition session in the given language,
  * listening for the duration specified by `dur_s' (in seconds).
  * Returns immediately. When the recognition finishes or an eror occurs,

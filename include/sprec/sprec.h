@@ -1,4 +1,4 @@
-/**
+/*
  * sprec.h
  * libsprec
  *

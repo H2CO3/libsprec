@@ -1,4 +1,4 @@
-/**
+/*
  * web_client.h
  * libsprec
  * 
@@ -24,7 +24,7 @@ struct sprec_server_response {
 	int length;
 };
 
-/**
+/*
  * Sends the FLAC-encoded audio data.
  * Returns a struct server_response pointer,
  * in which the API's JSON response is present.
@@ -35,25 +35,25 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 
 void sprec_free_response(struct sprec_server_response *resp);
 
-/**
+/*
  * Duplicates the actually useful (i. e. text) part of the JSON
  * data received. Must be free()'d after use.
  * Returns NULL on error.
  */
 char *sprec_get_text_from_json(const char *json);
 
-/**
+/*
  * Gets the confidence of the recognition algorithm.
  * This may vary from 0.0 (not sure at all)
  * to 1.0 (absolutely sure).
  */
 double sprec_get_confidence_from_json(const char *json);
 
-/**
- * Read an entire file into memory. *buf should be free()'d after use.
+/*
+ * Reads an entire file into memory. *buf should be free()'d after use.
  * Returns 0 on success, non-0 on error
  */
-int sprec_get_file_contents(const char *file, char **buf, int *size);
+int sprec_get_file_contents(const char *file, void **buf, size_t *size);
 
 #ifdef __cplusplus
 }

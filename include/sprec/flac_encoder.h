@@ -1,4 +1,4 @@
-/**
+/*
  * flac_encoder.h
  * libsprec
  *
@@ -18,7 +18,7 @@ extern "C" {
 #include <stdint.h>
 #include <string.h>
 
-/**
+/*
  * Converts a WAV PCM file at the path `wavfile'
  * to a FLAC file with the same sample rate,
  * channel number and bit depth. Writes the result

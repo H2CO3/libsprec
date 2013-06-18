@@ -1,4 +1,4 @@
-/**
+/*
  * web_client.c
  * libsprec
  * 
@@ -6,12 +6,15 @@
  * on Tue 17/04/2012
  */
 
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <curl/curl.h>
 #include <jsonz/jsonz.h>
 #include <sprec/web_client.h>
 
-#define BUF_SIZE 1024
-#define RESPONSE_SIZE 1024
+#define BUF_SIZE 0x1000
+#define RESPONSE_SIZE 0x100
 
 static size_t http_callback(char *ptr, size_t count, size_t blocksize, void *userdata);
 
@@ -25,11 +28,9 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	char header[128];
 	
 	if (!data)
-	{
 		return 0;
-	}
 
-	/**
+	/*
 	 * Initialize the variables
 	 * Put the language code to the URL query string
 	 * If no language given, default to U. S. English
@@ -37,15 +38,12 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	sprintf(url, "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=%s", language ? language : "en-US");
 	resp = malloc(sizeof(*resp));
 	if (!resp)
-	{
 		return NULL;
-	}
 	
 	resp->data = malloc(1024);
 	resp->length = 0;
 	conn_hndl = curl_easy_init();
-	if (!conn_hndl)
-	{
+	if (!conn_hndl) {
 		sprec_free_response(resp);
 		return NULL;
 	}
@@ -58,7 +56,7 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 
 	curl_formadd(&form, &lastptr, CURLFORM_COPYNAME, "myfile", CURLFORM_CONTENTSLENGTH, length, CURLFORM_PTRCONTENTS, data, CURLFORM_END);
 
-	/**
+	/*
 	 * Setup the cURL handle
 	 */
 	curl_easy_setopt(conn_hndl, CURLOPT_URL, url);
@@ -67,25 +65,25 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	curl_easy_setopt(conn_hndl, CURLOPT_WRITEFUNCTION, http_callback);
 	curl_easy_setopt(conn_hndl, CURLOPT_WRITEDATA, resp);
 
-	/**
+	/*
 	 * SSL certificates are not available on iOS, so we have to trust Google
 	 * (0 means false)
 	 */
 	curl_easy_setopt(conn_hndl, CURLOPT_SSL_VERIFYPEER, 0);
 
-	/**
+	/*
 	 * Initiate the HTTP(S) transfer
 	 */
 	curl_easy_perform(conn_hndl);
 
-	/**
+	/*
 	 * Clean up
 	 */
 	curl_formfree(form);
 	curl_slist_free_all(headers);
 	curl_easy_cleanup(conn_hndl);
 
-	/**
+	/*
 	 * NULL-terminate the JSON response string
 	 */
 	resp->data[resp->length] = '\0';
@@ -95,8 +93,7 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 
 void sprec_free_response(struct sprec_server_response *resp)
 {
-	if (resp)
-	{
+	if (resp) {
 		free(resp->data);
 		free(resp);
 	}
@@ -108,35 +105,29 @@ char *sprec_get_text_from_json(const char *json)
 	void *guesses_array;
 	void *guess;
 	void *str_obj;
-	char *str_tmp;
+	const char *str_tmp;
 	char *text;
 	
 	if (!json)
-	{
 		return NULL;
-	}
 	
-	/**
+	/*
 	 * Find the appropriate object in the JSON structure.
 	 * Here we don't check for (return value != NULL), as
 	 * libjsonz handles NULL inputs correctly.
 	 */
-	text = NULL;
-	root = jsonz_object_parse(json);
-	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
+	root = jsonz_parse(json);
+	guesses_array = jsonz_dict_get(root, "hypotheses");
 	
-	guess = jsonz_object_array_nth_element(guesses_array, 0);
-	str_obj = jsonz_object_object_get_element(guess, "utterance");
-	/**
+	guess = jsonz_array_get(guesses_array, 0);
+	str_obj = jsonz_dict_get(guess, "utterance");
+	/*
 	 * The only exception: strdup(NULL) is undefined behaviour
 	 */
-	str_tmp = jsonz_object_string_get_str(str_obj);
-	if (str_tmp)
-	{
-		text = strdup(str_tmp);
-	}
+	str_tmp = jsonz_string_get_str(str_obj);
+	text = str_tmp ? strdup(str_tmp) : NULL;
 	
-	jsonz_object_release(root);
+	jsonz_object_free(root);
 	return text;
 }
 
@@ -149,58 +140,68 @@ double sprec_get_confidence_from_json(const char *json)
 	double result;
 	
 	if (!json)
-	{
 		return 0.0;
-	}
 	
-	/**
+	/*
 	 * Find the appropriate object in the JSON structure.
 	 * Here we don't check for (return value != NULL), as
 	 * libjsonz handles NULL inputs correctly.
 	 */
-	root = jsonz_object_parse(json);
-	guesses_array = jsonz_object_object_get_element(root, "hypotheses");
-	guess = jsonz_object_array_nth_element(guesses_array, 0);
-	num_obj = jsonz_object_object_get_element(guess, "confidence");
-	result = jsonz_object_number_get_num_value(num_obj);
-	jsonz_object_release(root);
+	root = jsonz_parse(json);
+	guesses_array = jsonz_dict_get(root, "hypotheses");
+	guess = jsonz_array_get(guesses_array, 0);
+	num_obj = jsonz_dict_get(guess, "confidence");
+	result = jsonz_number_get_float_value(num_obj);
+	jsonz_object_free(root);
 	return result;
 }
 
-int sprec_get_file_contents(const char *file, char **buf, int *size)
+int sprec_get_file_contents(const char *file, void **cont, size_t *size)
 {
-	/**
+	/*
 	 * Open file for reading
 	 */
 	int fd = open(file, O_RDONLY);
-	int total_size;
-	int num_bytes = 1;
+	if (fd < 0)
+		return -1;
+	
+	off_t total = lseek(fd, 0, SEEK_END);
+	if (total < 0)
+		return -1;
+	
+	lseek(fd, 0, SEEK_SET);
+	
+	ssize_t n, rest = total, readb = 0;
+	unsigned char buf[BUF_SIZE];
+	unsigned char *result = NULL;
 
-	char tmp[BUF_SIZE];
-	char *result;
-	char *realloc_guard;
-
-	/**
+	/*
 	 * Read the whole file into memory
 	 */
-	for (result = NULL, total_size = 0; num_bytes > 0; num_bytes = read(fd, tmp, BUF_SIZE))
-	{
-		realloc_guard = realloc(result, total_size + num_bytes);
-		if (!realloc_guard)
-		{
+	while (rest > 0) {
+		n = read(fd, buf, BUF_SIZE);
+		if (n < 0) {
 			close(fd);
 			free(result);
 			return -1;
 		}
 		
-		result = realloc_guard;
-		memcpy(result + total_size, tmp, num_bytes);
-		total_size += num_bytes;
+		unsigned char *tmp = realloc(result, readb + n);
+		if (!tmp) {
+			close(fd);
+			free(result);
+			return -1;
+		}
+		
+		result = tmp;
+		memcpy(result + readb, buf, n);
+		readb += n;
+		rest -= n;
 	}
 
 	close(fd);
-	*buf = result;
-	*size = total_size;
+	*cont = result;
+	*size = total;
 	
 	return 0;
 }
