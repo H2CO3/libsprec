@@ -24,8 +24,8 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	struct curl_httppost *form, *lastptr;
 	struct curl_slist *headers;
 	struct sprec_server_response *resp;
-	char url[128];
-	char header[128];
+	char url[0x100];
+	char header[0x100];
 	
 	if (!data)
 		return 0;
@@ -35,12 +35,22 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	 * Put the language code to the URL query string
 	 * If no language given, default to U. S. English
 	 */
-	sprintf(url, "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=%s", language ? language : "en-US");
+	snprintf(
+		url,
+		sizeof(url),
+		"https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=%s",
+		language ? language : "en-US"
+	);
 	resp = malloc(sizeof(*resp));
 	if (!resp)
 		return NULL;
 	
-	resp->data = malloc(1024);
+	resp->data = malloc(RESPONSE_SIZE);
+	if (!resp->data) {
+		sprec_free_response(resp);
+		return NULL;
+	}
+	
 	resp->length = 0;
 	conn_hndl = curl_easy_init();
 	if (!conn_hndl) {
@@ -51,10 +61,25 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	form = NULL;
 	lastptr = NULL;
 	headers = NULL;
-	sprintf(header, "Content-Type: audio/x-flac; rate=%lu", (unsigned long)sample_rate);
+	snprintf(
+		header,
+		sizeof(header),
+		"Content-Type: audio/x-flac; rate=%lu",
+		(unsigned long)sample_rate
+	);
 	headers = curl_slist_append(headers, header);
 
-	curl_formadd(&form, &lastptr, CURLFORM_COPYNAME, "myfile", CURLFORM_CONTENTSLENGTH, length, CURLFORM_PTRCONTENTS, data, CURLFORM_END);
+	curl_formadd(
+		&form,
+		&lastptr,
+		CURLFORM_COPYNAME,
+		"myfile",
+		CURLFORM_CONTENTSLENGTH,
+		length,
+		CURLFORM_PTRCONTENTS,
+		data,
+		CURLFORM_END
+	);
 
 	/*
 	 * Setup the cURL handle
@@ -210,8 +235,13 @@ static size_t http_callback(char *ptr, size_t count, size_t blocksize, void *use
 {
 	struct sprec_server_response *response = userdata;
 	size_t size = count * blocksize;
-	memcpy(response->data + response->length, ptr, size);
-	response->length += size;
+	
+	if (response->length + size < RESPONSE_SIZE) {
+		/* do not write past buffer */
+		memcpy(response->data + response->length, ptr, size);
+		response->length += size;
+	}
+	
 	return size;
 }
 

@@ -142,7 +142,17 @@ int sprec_flac_encode(const char *wavfile, const char *flacfile)
 				/*
 				 * 16 bps, signed little endian
 				 */
-				pcm[i] = *(int16_t *)(buffer + i * 2);
+				uint16_t lsb = *(uint8_t *)(buffer + i * 2 + 0);
+				uint16_t msb = *(uint8_t *)(buffer + i * 2 + 1);
+				uint16_t usample = (msb << 8) | lsb;
+				
+				/* hooray, shifting into the sign bit is UB,
+				 * so we must memcpy() into the signed integer.
+				 * Thanks C standard, what a waste of LOC...
+				 */
+				int16_t ssample;
+				memcpy(&ssample, &usample, sizeof(ssample));
+				pcm[i] = ssample;
 			} else {
 				/*
 				 * 8 bps, unsigned
