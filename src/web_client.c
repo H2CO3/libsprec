@@ -28,7 +28,7 @@ struct sprec_server_response *sprec_send_audio_data(void *data, int length, cons
 	char header[0x100];
 	
 	if (!data)
-		return 0;
+		return NULL;
 
 	/*
 	 * Initialize the variables
