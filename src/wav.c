@@ -257,7 +257,7 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 	}
 
 	val = hdr->sample_rate;
-	snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);
+	err = snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);
 	if (err) {
 		snd_pcm_close(handle);
 		return err;
@@ -334,7 +334,15 @@ int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_
 			/*
 			 * minus EPIPE means X-run
 			 */
-			snd_pcm_prepare(handle);
+			err = snd_pcm_recover(handle, err, 0);
+		}
+		
+		/* still not good */
+		if (err) {
+			snd_pcm_close(handle);
+			free(buffer);
+			close(fd);
+			return err;
 		}
 		
 		write(fd, buffer, size);
