@@ -43,13 +43,13 @@ sprec_send_audio_data(
 	 */
 	snprintf(
 		url,
-		sizeof(url),
+		sizeof url,
 		"https://www.google.com/speech-api/v2/recognize?output=json&key=%s&lang=%s",
 		apikey,
 		language ? language : "en-US"
 	);
 
-	resp = malloc(sizeof(*resp));
+	resp = malloc(sizeof *resp);
 	if (resp == NULL) {
 		return NULL;
 	}
@@ -68,7 +68,7 @@ sprec_send_audio_data(
 	headers = NULL;
 	snprintf(
 		header,
-		sizeof(header),
+		sizeof header,
 		"Content-Type: audio/x-flac; rate=%" PRIu32,
 		sample_rate
 	);

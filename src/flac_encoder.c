@@ -21,7 +21,7 @@
  * Returns: location of the string, or
  * NULL if not found
  */
-const char *memstr(const void *haystack, const char *needle, size_t size);
+static const char *memstr(const void *haystack, const char *needle, size_t size);
 
 typedef struct sprec_encoder_state {
 	unsigned char *buf;
@@ -85,7 +85,7 @@ void *sprec_flac_encode(const char *wavfile, size_t *size)
 	/*
 	 * Search the offset of the data section
 	 */
-	dataloc = memstr(buffer, "data", sizeof(buffer));
+	dataloc = memstr(buffer, "data", sizeof buffer);
 	if (dataloc == NULL) {
 		fclose(infile);
 		return NULL;
@@ -183,7 +183,7 @@ void *sprec_flac_encode(const char *wavfile, size_t *size)
 				 * Thanks C standard, what a waste of LOC...
 				 */
 				int16_t ssample;
-				memcpy(&ssample, &usample, sizeof(ssample));
+				memcpy(&ssample, &usample, sizeof ssample);
 				pcm[i] = ssample;
 			} else {
 				/*
@@ -221,7 +221,7 @@ void *sprec_flac_encode(const char *wavfile, size_t *size)
 	return flac_data.buf;
 }
 
-const char *memstr(const void *haystack, const char *needle, size_t size)
+static const char *memstr(const void *haystack, const char *needle, size_t size)
 {
 	const char *p;
 	const char *hs = haystack;

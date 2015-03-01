@@ -105,7 +105,7 @@ pthread_t sprec_recognize_async(
 	struct sprec_recattr_internal *context;
 
 	/* Fill in the context structure */
-	context = malloc(sizeof(*context));
+	context = malloc(sizeof *context);
 	if (context == NULL) {
 		cb(NULL, userdata);
 		return 0;

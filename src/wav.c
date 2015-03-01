@@ -57,7 +57,7 @@ typedef struct sprec_record_state {
 sprec_wav_header *sprec_wav_header_from_data(const FLAC__byte *ptr)
 {
 	sprec_wav_header *hdr;
-	hdr = malloc(sizeof(*hdr));
+	hdr = malloc(sizeof *hdr);
 	if (hdr == NULL) {
 		return NULL;
 	}
@@ -88,7 +88,7 @@ sprec_wav_header *sprec_wav_header_from_params(
 )
 {
 	sprec_wav_header *hdr;
-	hdr = malloc(sizeof(*hdr));
+	hdr = malloc(sizeof *hdr);
 	if (hdr == NULL) {
 		return NULL;
 	}
@@ -151,7 +151,7 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	sprec_record_state record_state;
 	int i;
 	OSStatus status;
-	memset(&record_state, 0, sizeof(record_state));
+	memset(&record_state, 0, sizeof record_state);
 	sprec_setup_audio_format(hdr, &record_state.data_format);
 
 	/*
@@ -479,7 +479,7 @@ static void sprec_calculate_buffsize(
 	int max_packet_size = desc.mBytesPerPacket;
 
 	if (max_packet_size == 0) {
-		UInt32 packet_size_size = sizeof(max_packet_size);
+		UInt32 packet_size_size = sizeof max_packet_size;
 		AudioQueueGetProperty(
 			audio_queue,
 			kAudioConverterPropertyMaximumOutputPacketSize,
