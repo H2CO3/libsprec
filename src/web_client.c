@@ -134,7 +134,8 @@ static size_t http_callback(char *ptr, size_t count, size_t blocksize, void *use
 	sprec_server_response *response = userdata;
 	size_t size = count * blocksize;
 
-	response->data = realloc(response->data, response->length + size);
+	// +1 for terminating NUL byte
+	response->data = realloc(response->data, response->length + size + 1);
 	memcpy(response->data + response->length, ptr, size);
 	response->length += size;
 
