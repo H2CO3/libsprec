@@ -13,20 +13,18 @@
 
 int main(int argc, char *argv[])
 {
-	struct sprec_result *res;
-
-	res = sprec_recognize_sync(argv[1], strtod(argv[2], NULL));
-	printf("%s (%lf)\n", res->text, res->confidence);
-	sprec_result_free(res);
+	char *res = sprec_recognize_sync(argv[1], argv[2], strtod(argv[3], NULL));
+	printf("%s\n", res);
+	free(res);
 	return 0;
 }
 
 #else
 
-void callback(struct sprec_result *res, void *data)
+static void callback(const char *res, void *data)
 {
 	printf("Thread: %lld\n", (long long)pthread_self());
-	printf("%s (%lf)\n", res->text, res->confidence);
+	printf("%s\n", res);
 }
 
 int main(int argc, char *argv[])
@@ -34,11 +32,10 @@ int main(int argc, char *argv[])
 	pthread_t pid;
 	void *retval;
 
-	pid = sprec_recognize_async(argv[1], strtod(argv[2], NULL), callback, NULL);
+	pid = sprec_recognize_async(argv[1], argv[2], strtod(argv[3], NULL), callback, NULL);
 	printf("Thread: %lld\n", (long long)pthread_self());
 	pthread_join(pid, &retval);
 	return 0;
 }
 
 #endif
-

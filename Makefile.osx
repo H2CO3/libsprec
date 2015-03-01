@@ -1,7 +1,7 @@
 TARGET = libsprec.dylib
 OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o src/recognize.o
-CFLAGS = -I/opt/local/include -I../libjsonz -dynamiclib -c -Wall -Iinclude -m32 -Os
-LDFLAGS = -L/opt/local/lib -w -dynamiclib -install_name /usr/lib/$(TARGET) -m32 -framework CoreFoundation -framework AudioToolbox -lcurl -ljsonz -lFLAC
+CFLAGS = -std=c99 -I/opt/local/include -I../libjsonz -dynamiclib -c -Wall -pedantic -Iinclude -O0 -g -DDEBUG -UNDEBUG
+LDFLAGS = -L/opt/local/lib -w -dynamiclib -install_name /usr/lib/$(TARGET) -framework CoreFoundation -framework AudioToolbox -lcurl -lFLAC -g
 CC = clang
 LD = $(CC)
 
@@ -10,15 +10,10 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-tool: sprec
+example: simple
 
-simple: sprec_simple
-
-sprec: examples/tool.o $(TARGET)
-	$(LD) -o $@ $< -lsprec -m32
-
-sprec_simple: examples/simple.o $(TARGET)
-	$(LD) -o $@ $< -lsprec -m32
+simple: examples/simple.o $(TARGET)
+	$(LD) -o $@ $< -lsprec
 
 install: $(TARGET)
 	cp $(TARGET) /usr/lib/
@@ -28,7 +23,6 @@ install: $(TARGET)
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f $(TARGET) sprec sprec_simple src/*.o examples/*.o *~
+	rm -f $(TARGET) simple src/*.o examples/*.o *~
 
-.PHONY: all clean install tool sprec
-
+.PHONY: all clean install simple

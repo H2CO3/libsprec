@@ -1,9 +1,9 @@
 TARGET = libsprec.dylib
 OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o src/recognize.o
-SYSROOT = /var/mobile/iPhoneOS5.1.sdk
-CFLAGS = -isysroot $(SYSROOT) -dynamiclib -c -Wall -Iinclude
-LDFLAGS = -isysroot $(SYSROOT) -w -dynamiclib -install_name /usr/lib/$(TARGET) -framework CoreFoundation -framework AudioToolbox -lcurl -ljsonz -lFLAC
-CC = clang
+
+CFLAGS = -arch armv7 -std=c99 -dynamiclib -c -Wall -pedantic -Iinclude
+LDFLAGS = -arch armv7 -dynamiclib -install_name /usr/lib/$(TARGET) -framework CoreFoundation -framework AudioToolbox -lcurl -lFLAC
+CC = xcrun -sdk iphoneos clang
 LD = $(CC)
 
 all: $(TARGET)
@@ -11,14 +11,10 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-tool: sprec
 
-simple: sprec_simple
+example: simple
 
-sprec: examples/tool.o $(TARGET)
-	$(LD) -isysroot $(SYSROOT) -o $@ $< -lsprec
-
-sprec_simple: examples/simple.o $(TARGET)
+simple: examples/simple.o $(TARGET)
 	$(LD) -isysroot $(SYSROOT) -o $@ $< -lsprec
 
 install: $(TARGET)
@@ -31,7 +27,7 @@ install: $(TARGET)
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f $(TARGET) sprec sprec_simple src/*.o examples/*.o *~
+	rm -f $(TARGET) simple src/*.o examples/*.o *~
 
-.PHONY: all clean install tool sprec
+.PHONY: all clean install simple
 

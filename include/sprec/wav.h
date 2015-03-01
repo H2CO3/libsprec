@@ -18,12 +18,14 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
+#include <FLAC/all.h>
+
 /*
  * _without_ the data header (8 bytes)
  */
 #define SPREC_WAV_HEADER_SIZE 36
 
-struct sprec_wav_header {
+typedef struct sprec_wav_header {
 	char RIFF_marker[4];
 	uint32_t file_size;
 	char filetype_header[4];
@@ -35,7 +37,7 @@ struct sprec_wav_header {
 	uint32_t bytes_per_second;
 	uint16_t bytes_per_frame;
 	uint16_t bits_per_sample;
-};
+} sprec_wav_header;
 
 /*
  * Allocates a new WAV file header from the raw header data
@@ -43,14 +45,18 @@ struct sprec_wav_header {
  * Returns NULL on error.
  * Should be free()'d after use.
  */
-struct sprec_wav_header *sprec_wav_header_from_data(const void *ptr);
+sprec_wav_header *sprec_wav_header_from_data(const FLAC__byte *ptr);
 
 /*
  * Allocates a new WAV file header from the given PCM parameters.
  * Returns NULL on error.
  * Should be free()'d after use.
  */
-struct sprec_wav_header *sprec_wav_header_from_params(uint32_t sample_rate, uint16_t bit_depth, uint16_t channels);
+sprec_wav_header *sprec_wav_header_from_params(
+	uint32_t sample_rate,
+	uint16_t bit_depth,
+	uint16_t channels
+);
 
 /*
  * Writes a WAV header to a file represented by `fd'.
@@ -58,7 +64,7 @@ struct sprec_wav_header *sprec_wav_header_from_params(uint32_t sample_rate, uint
  * of the file.
  * Returns 0 on success, non-0 on error.
  */
-int sprec_wav_header_write(int fd, struct sprec_wav_header *hdr);
+int sprec_wav_header_write(FILE *fd, sprec_wav_header *hdr);
 
 /*
  * Records a WAV (PCM) audio file to the file `filename', with the
@@ -70,11 +76,10 @@ int sprec_wav_header_write(int fd, struct sprec_wav_header *hdr);
  * interpreted as an AudioQueue error code.
  * On other Unices, the return code is an ALSA (libasound) status code.
  */
-int sprec_record_wav(const char *filename, struct sprec_wav_header *hdr, uint32_t duration_ms);
+int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t duration_ms);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* !__SPREC_WAV_H__ */
-

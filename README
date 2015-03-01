@@ -13,7 +13,6 @@ Tested on iOS 4.2.1 and Ubuntu 11.10.
 
 If immediate recording of FLAC audio is possible on a platform, then it should be done using 16000 samples/second, 2 channels, 16 bit/sample (signed
 little endian); and only the functions in send_data.h have to be used:
-	sprec_get_file_contents() reads a file and returns a pointer to its contents.
 	sprec_send_audio_data() takes a pointer to the contents of a FLAC file and sends it to the Google Speech API along with the appropriate
 	headers and other parameters. Returns the server's response.
 	sprec_get_text_from_json() parses the JSON response and finds the actual text.
@@ -26,4 +25,3 @@ To simplify this task, two convenience functions, sprec_recognize_sync() and
 sprec_recognize_async() are also available (the latter needs POSIX threads).
 
 See examples/tool.c and examples/simple.c for usage information.
-

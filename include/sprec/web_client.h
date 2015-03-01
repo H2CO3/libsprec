@@ -1,7 +1,7 @@
 /*
  * web_client.h
  * libsprec
- * 
+ *
  * Created by Árpád Goretity (H2CO3)
  * on Tue 17/04/2012
  */
@@ -19,10 +19,10 @@ extern "C" {
 #include <fcntl.h>
 #include <string.h>
 
-struct sprec_server_response {
+typedef struct sprec_server_response {
 	char *data;
-	int length;
-};
+	size_t length;
+} sprec_server_response;
 
 /*
  * Sends the FLAC-encoded audio data.
@@ -31,33 +31,19 @@ struct sprec_server_response {
  * Should be freed with sprec_free_response().
  * Returns NULL on error.
  */
-struct sprec_server_response *sprec_send_audio_data(void *data, int length, const char *language, uint32_t sample_rate);
+sprec_server_response *
+sprec_send_audio_data(
+	const void *data,
+	size_t length,
+	const char *apikey,
+	const char *language,
+	uint32_t sample_rate
+);
 
-void sprec_free_response(struct sprec_server_response *resp);
-
-/*
- * Duplicates the actually useful (i. e. text) part of the JSON
- * data received. Must be free()'d after use.
- * Returns NULL on error.
- */
-char *sprec_get_text_from_json(const char *json);
-
-/*
- * Gets the confidence of the recognition algorithm.
- * This may vary from 0.0 (not sure at all)
- * to 1.0 (absolutely sure).
- */
-double sprec_get_confidence_from_json(const char *json);
-
-/*
- * Reads an entire file into memory. *buf should be free()'d after use.
- * Returns 0 on success, non-0 on error
- */
-int sprec_get_file_contents(const char *file, void **buf, size_t *size);
+void sprec_free_response(sprec_server_response *resp);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* !__SPREC_WEB_CLIENT_H__ */
-

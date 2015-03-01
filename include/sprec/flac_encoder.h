@@ -23,13 +23,14 @@ extern "C" {
  * to a FLAC file with the same sample rate,
  * channel number and bit depth. Writes the result
  * to the file at path `flacfile'.
- * Returns 0 on success, non-0 on error.
+ * Returns a pointer to FLAC data buffer on success,
+ * NULL on error. On success, *size will be set to
+ * the size of the FLAC data (in bytes).
  */
-int sprec_flac_encode(const char *wavfile, const char *flacfile);
+void *sprec_flac_encode(const char *wavfile, size_t *size);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* !__SPREC_FLAC_ENCODER_H__ */
-
