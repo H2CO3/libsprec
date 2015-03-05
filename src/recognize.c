@@ -33,11 +33,10 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	size_t len;
 	char *text, *tmpstub, *buf;
 	char wavfile[L_tmpnam + 5];
-	char flacfile[L_tmpnam + 6];
+
 
 	tmpstub = tmpnam(NULL);
 	sprintf(wavfile, "%s.wav", tmpstub);
-	sprintf(flacfile, "%s.flac", tmpstub);
 
 	/*
 	 * sample rate = 16000Hz, bit depth = 16bps, stereo
@@ -86,7 +85,6 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	 * not fill the /tmp folder with garbage
 	 */
 	remove(wavfile);
-	remove(flacfile);
 
 	return text;
 }
