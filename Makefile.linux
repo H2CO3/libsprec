@@ -1,6 +1,6 @@
 TARGET = libsprec.so
 OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o src/recognize.o
-CFLAGS = -fPIC -c -Wall -Iinclude -std=c99 $(DEBUG)
+CFLAGS = -fPIC -c -Wall -Iinclude -std=c99 
 LDFLAGS = -shared -fPIC -lcurl -lFLAC -lasound
 CC = gcc
 LD = $(CC)
