@@ -412,7 +412,7 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 		/* still not good */
 		if (err) {
         	fprintf(stderr, "%s,%d: snd_pcm_readi failed\n",	
-				__FILE__, __LINE__, err);
+				__FILE__, __LINE__);
 			snd_pcm_close(handle);
 			free(buffer);
 			fclose(f);
