@@ -13,8 +13,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,7 +24,6 @@ typedef struct sprec_server_response {
 	size_t length;
 } sprec_server_response;
 
-typedef unsigned int uint32_t;
 /*
  * Sends the FLAC-encoded audio data.
  * Returns a struct server_response pointer,

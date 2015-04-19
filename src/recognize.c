@@ -6,11 +6,9 @@
  * on Sun 20/05/2012.
  */
 
-#define _DEFAULT_SOURCE	/* for strdup */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <pthread.h>
 #include <sprec/wav.h>
 #include <sprec/flac_encoder.h>
@@ -37,7 +35,6 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	char wavfile[L_tmpnam + 5];
 
 
-
 	tmpstub = tmpnam(NULL);
 	sprintf(wavfile, "%s.wav", tmpstub);
 
@@ -46,15 +43,11 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	 */
 	hdr = sprec_wav_header_from_params(16000, 16, 2);
 	if (hdr == NULL) {
-		fprintf(stderr, "%s,%d: sprec_wav_header_from_params failed\n", 
-				__FILE__, __LINE__);
 		return NULL;
 	}
 
 	err = sprec_record_wav(wavfile, hdr, 1000 * dur_s);
 	if (err != 0) {
-		fprintf(stderr, "%s,%d: sprec_record_wav failed\n", 
-				__FILE__, __LINE__);
 		free(hdr);
 		return NULL;
 	}
@@ -65,8 +58,6 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	 */
 	buf = sprec_flac_encode(wavfile, &len);
 	if (buf == NULL) {
-		fprintf(stderr, "%s,%d: sprec_flac_encode failed\n", 
-				__FILE__, __LINE__);
 		free(hdr);
 		return NULL;
 	}
@@ -79,8 +70,6 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	free(hdr);
 
 	if (resp == NULL) {
-		fprintf(stderr, "%s,%d: sprec_send_audio_data	failed\n", 
-				__FILE__, __LINE__);
 		return NULL;
 	}
 
@@ -96,7 +85,7 @@ char *sprec_recognize_sync(const char *apikey, const char *lang, double dur_s)
 	 * not fill the /tmp folder with garbage
 	 */
 	remove(wavfile);
-	printf("Text: %s\n", text);
+
 	return text;
 }
 
