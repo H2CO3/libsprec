@@ -19,6 +19,7 @@ extern "C" {
 #include <stdio.h>
 
 #include <FLAC/all.h>
+
 /*
  * _without_ the data header (8 bytes)
  */
