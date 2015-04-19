@@ -11,7 +11,6 @@
 #include <fcntl.h>
 #include <curl/curl.h>
 #include <sprec/web_client.h>
-#include <inttypes.h>
 
 #define BUF_SIZE 0x1000
 

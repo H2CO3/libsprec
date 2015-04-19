@@ -1,6 +1,6 @@
 TARGET = libsprec.so
 OBJECTS = src/wav.o src/flac_encoder.o src/web_client.o src/recognize.o
-CFLAGS = -fPIC -c -Wall -Iinclude -std=c99 
+CFLAGS = -fPIC -c -Wall -Iinclude -std=c99
 LDFLAGS = -shared -fPIC -lcurl -lFLAC -lasound
 CC = gcc
 LD = $(CC)
@@ -22,10 +22,6 @@ simple: examples/simple.o $(TARGET)
 install: $(TARGET)
 	cp $(TARGET) /usr/lib/
 	cp -r include/sprec /usr/include/
-
-uninstall:
-	$(RM) /usr/lib/$(TARGET)
-	$(RM) -r /usr/include/sprec
 
 clean:
 	rm -f $(TARGET) simple src/*.o examples/*.o *~

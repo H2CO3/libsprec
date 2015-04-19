@@ -8,8 +8,7 @@
 
 #include <unistd.h>
 #include <sprec/wav.h>
-#include <alsa/asoundlib.h>	
-#include <alloca.h>
+
 #if defined _WIN64 || defined _WIN32
 	#error "This has to be implemented yet!"
 #elif defined __APPLE__
@@ -266,8 +265,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	 */
 	err = snd_pcm_open(&handle, "pulse", SND_PCM_STREAM_CAPTURE, 0);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_open failed\n",	
-				__FILE__, __LINE__);
 		return err;
 	}
 
@@ -284,8 +281,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 
 	err = snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_hw_params_set_access failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return err;
 	}
@@ -298,8 +293,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 
 	err = snd_pcm_hw_params_set_channels(handle, params, hdr->number_of_channels);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_hw_params_set_channels failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return err;
 	}
@@ -307,8 +300,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	val = hdr->sample_rate;
 	err = snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_params_set_rate_near failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return err;
 	}
@@ -321,8 +312,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	frames = 32;
 	err = snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_hw_params_set_period_size_near failed\n"
-				, __FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return err;
 	}
@@ -332,16 +321,12 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	 */
 	err = snd_pcm_hw_params(handle, params);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_hw_params failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return err;
 	}
 
 	err = snd_pcm_hw_params_get_period_size(params, &frames, &dir);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_hw_params_get_period_size failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return err;
 	}
@@ -353,8 +338,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	size = frames * hdr->bits_per_sample / 8 * hdr->number_of_channels;
 	buffer = malloc(size);
 	if (buffer == NULL) {
-        fprintf(stderr, "%s,%d: malloc failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		return -1;
 	}
@@ -365,8 +348,6 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	 */
 	err = snd_pcm_hw_params_get_period_time(params, &val, &dir);
 	if (err) {
-        fprintf(stderr, "%s,%d: snd_pcm_hw_params_get_period_time failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		free(buffer);
 		return err;
@@ -381,17 +362,13 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 	 */
 	f = fopen(filename, "wb");
 	if (f == NULL) {
-        fprintf(stderr, "%s,%d: fopen failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		free(buffer);
 		return -1;
 	}
 
-	err = sprec_wav_header_write(f, hdr);
+	err = sprec_wav_header_write(fd, hdr);
 	if (err) {
-        fprintf(stderr, "%s,%d: sprec_wav_header_write failed\n",	
-				__FILE__, __LINE__);
 		snd_pcm_close(handle);
 		free(buffer);
 		fclose(f);
@@ -404,15 +381,11 @@ int sprec_record_wav(const char *filename, sprec_wav_header *hdr, uint32_t durat
 			/*
 			 * minus EPIPE means X-run
 			 */
-        	fprintf(stderr, "%s,%d: snd_pcm_readi EPIPE failed\n",	
-				__FILE__, __LINE__);
 			err = snd_pcm_recover(handle, err, 0);
 		}
 
 		/* still not good */
 		if (err) {
-        	fprintf(stderr, "%s,%d: snd_pcm_readi failed\n",	
-				__FILE__, __LINE__, err);
 			snd_pcm_close(handle);
 			free(buffer);
 			fclose(f);
